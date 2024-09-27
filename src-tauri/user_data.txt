@@ -1,0 +1,9 @@
+SantiagoBedoya:$2b$12$.LZiqnU0QfW9h/mNTppfked1r9RaLGxqR9PNzDipYQmEHXGBtKS6a:Admin
+Testing:$2b$12$osP/.w7jqO7dItGXA4oTcuH0l.Zi/UsBvg.GSCZ0P1D1dAVubJ/zC:User
+Miguel:$2b$12$SWxWXGGG/KX7OHgq7e8Tm.4RUYtg27muBpKNQGBoXu3lIw/pYdQBu:User
+Raul:$2b$12$P1l5C0/rIXRnVMMVAN.0/e2h0cV5sTEn7.rGo6pemgS5bZoHupVgG:Admin
+Maria:$2b$12$h/0aap.RdWfUveqwK3OIMOCnUC9VyUjY98gAXej0AeBZ41F9bG6dK:Admin
+Mario:$2b$12$xW.NcZM4FAkTS5Jh4.DCxuUr8/4OTho3DHfxEriam0GRGoEKk5Bf6:Admin
+Juan:$2b$12$T3nmxvzgsUA4PKhTffdaV.5gZ4WXOP2U2uFPyO7kRr4tDF3OE37Ge:Admin
+Montanchez:$2b$12$6dzo7/4TvL0X4FIlVdT55OzqAF03xj.gIHYuSiwNhNw9bgfGKwPc6:Admin
+Hector:$2b$12$pdgaABut2txvqwgvMWTXxuUNiWbjkQxcFuWG0S0JB0ky6aELZeO4K:User
