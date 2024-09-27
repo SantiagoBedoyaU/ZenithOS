@@ -51,7 +51,7 @@ export default function TextEditor() {
                 value={fileContent}
                 onChange={handleEditorChange}
                 className={styles.editor}
-                rows={30}
+                rows={38}
                 cols={80}
             />
         </div>

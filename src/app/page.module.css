@@ -17,12 +17,12 @@
   background-image: url("/images/logo.png");
   background-repeat: no-repeat;
   background-position: center;
-  background-color: white;
+  background-color: #1a1a1a;
 }
 
 .title {
   text-align: center;
-  color: black; 
+  color: white; 
 }
 
 .login {

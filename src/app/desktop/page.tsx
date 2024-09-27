@@ -12,6 +12,7 @@ import ImageViewer from "./components/ImageViewer";
 import TextEditor from "./components/TextEditor";
 import FileManager from "./components/FileManager";
 import { useRouter } from "next/navigation";
+import { ConfigProvider, theme } from "antd";
 
 export default function Desktop() {
   const router = useRouter();
@@ -50,46 +51,50 @@ export default function Desktop() {
 
 
   return (
-    <div className={styles.desktop}>
-      {showUsers && (
-        <Window width="90%" height="80%" onClose={() => setShowUsers(false)}>
-          <UsersForm />
-        </Window>
-      )}
-      {showCalculator && (
-        <Window width="50%" height="50%" onClose={() => setShowCalculator(false)}>
-          <Calculator />
-        </Window>
-      )}
-      {showAudioReproducer && (
-        <Window width="30%" height="20%" onClose={() => setShowAudioReproducer(false)}>
-          <AudioReproducer />
-        </Window>
-      )}
-      {showImageViewer && (
-        <Window width="60%" height="70%" onClose={() => setShowImageViewer(false)}>
-          <ImageViewer />
-        </Window>
-      )}
-      {showTextEditor && (
-        <Window width="90%" height="80%" onClose={() => setShowTextEditor(false)}>
-          <TextEditor />
-        </Window>
-      )}
-      {showFileManager && (
-        <Window width="90%" height="80%" onClose={() => setShowFileManager(false)}>
-          <FileManager />
-        </Window>
-      )}
-      <Notch />
-      <Dock>
-        <Icon image="/images/file_manager_logo.png" onClick={toggleShowFileManager} />
-        <Icon image="/images/users_logo.png" onClick={toggleShowUsers} />
-        <Icon image="/images/calculator_logo.webp" onClick={toggleShowCalculator} />
-        <Icon image="/images/audio_reproducer_logo.png" onClick={toggleShowAudioReproducer} />
-        <Icon image="/images/images_logo.png" onClick={toggleShowImageViewer} />
-        <Icon image="/images/text_editor_logo.png" onClick={toggleShowTextEditor} />
-      </Dock>
-    </div>
+    <ConfigProvider
+      theme={{algorithm: theme.darkAlgorithm}}
+    >
+      <div className={styles.desktop}>
+        {showUsers && (
+          <Window width="90%" height="80%" onClose={() => setShowUsers(false)}>
+            <UsersForm />
+          </Window>
+        )}
+        {showCalculator && (
+          <Window width="50%" height="50%" onClose={() => setShowCalculator(false)}>
+            <Calculator />
+          </Window>
+        )}
+        {showAudioReproducer && (
+          <Window width="30%" height="20%" onClose={() => setShowAudioReproducer(false)}>
+            <AudioReproducer />
+          </Window>
+        )}
+        {showImageViewer && (
+          <Window width="60%" height="70%" onClose={() => setShowImageViewer(false)}>
+            <ImageViewer />
+          </Window>
+        )}
+        {showTextEditor && (
+          <Window width="90%" height="80%" onClose={() => setShowTextEditor(false)}>
+            <TextEditor />
+          </Window>
+        )}
+        {showFileManager && (
+          <Window width="90%" height="80%" onClose={() => setShowFileManager(false)}>
+            <FileManager />
+          </Window>
+        )}
+        <Notch />
+        <Dock>
+          <Icon image="/images/file_manager_logo.png" onClick={toggleShowFileManager} />
+          <Icon image="/images/users_logo.png" onClick={toggleShowUsers} />
+          <Icon image="/images/calculator_logo.webp" onClick={toggleShowCalculator} />
+          <Icon image="/images/audio_reproducer_logo.png" onClick={toggleShowAudioReproducer} />
+          <Icon image="/images/images_logo.png" onClick={toggleShowImageViewer} />
+          <Icon image="/images/text_editor_logo.png" onClick={toggleShowTextEditor} />
+        </Dock>
+      </div>
+    </ConfigProvider>
   );
 }

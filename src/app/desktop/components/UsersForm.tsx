@@ -72,7 +72,7 @@ export default function UsersForm() {
   };
   return (
     <div style={{ padding: "20px" }}>
-      <h2 style={{color: 'black'}}>Users</h2>
+      <h2>Users</h2>
       <br />
       <Form
         name="basic"

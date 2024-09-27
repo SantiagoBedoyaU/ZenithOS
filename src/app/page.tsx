@@ -1,7 +1,7 @@
 "use client";
 import { invoke } from "@tauri-apps/api";
 import styles from "./page.module.css";
-import { Input, Button, Form, FormProps, Alert } from "antd";
+import { Input, Button, Form, FormProps, Alert, ConfigProvider, theme } from "antd";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -37,44 +37,50 @@ export default function Login() {
     setMessage("");
   };
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <div className={styles.login}>
-          <h1 className={styles.title}>ZenithOS</h1>
-          {message && (
-            <Alert message={message} closable type="error" onClose={onClose} />
-          )}
-          <br />
-          <Form
-            name="basic"
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="off"
-          >
-            <Form.Item
-              label="Username"
-              name="username"
-              rules={[
-                { required: true, message: "Please input your username" },
-              ]}
+    <ConfigProvider
+      theme={{
+        algorithm: theme.darkAlgorithm
+      }}
+    >
+      <div className={styles.page}>
+        <main className={styles.main}>
+          <div className={styles.login}>
+            <h1 className={styles.title}>ZenithOS</h1>
+            {message && (
+              <Alert message={message} closable type="error" onClose={onClose} />
+            )}
+            <br />
+            <Form
+              name="basic"
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
             >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[
-                { required: true, message: "Please input your password" },
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form>
-        </div>
-      </main>
-    </div>
+              <Form.Item
+                label="Username"
+                name="username"
+                rules={[
+                  { required: true, message: "Please input your username" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Password"
+                name="password"
+                rules={[
+                  { required: true, message: "Please input your password" },
+                ]}
+              >
+                <Input.Password />
+              </Form.Item>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
+            </Form>
+          </div>
+        </main>
+      </div>
+    </ConfigProvider>
   );
 }
