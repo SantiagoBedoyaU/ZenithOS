@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import styles from '../page.module.css'
+import { invoke } from '@tauri-apps/api';
+import { Alert } from 'antd';
 
 export default function TextEditor() {
     const [fileContent, setFileContent] = useState('');
     const [fileName, setFileName] = useState('');
     const [fileType, setFileType] = useState('text/plain'); // default file type is text/plain, which corresponds to .txt files
+    const [message, setMessage] = useState('')
 
     const handleOpenFile = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files![0];
@@ -18,12 +21,15 @@ export default function TextEditor() {
     };
 
     const handleSaveFile = () => {
-        const blob = new Blob([fileContent], { type: fileType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName + ".txt" || 'untitled.txt'; // if fileName is empty, default to 'untitled.txt'
-        a.click();
+        invoke<string>('write_user_file', {
+            folderName: localStorage.getItem("folderName"),
+            filename: fileName,
+            content: fileContent
+        }).then(result => {
+            setMessage(result)
+        }).catch(err => {
+            console.error(err);
+        })
     };
 
     const handleEditorChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -32,6 +38,10 @@ export default function TextEditor() {
 
     const handleFileNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFileName(event.target.value);
+    };
+
+    const onClose = () => {
+        setMessage("");
     };
 
     return (
@@ -45,13 +55,16 @@ export default function TextEditor() {
                     placeholder="Enter file name"
                     className={styles.fileNameInput}
                 />
+                {message && (
+                    <Alert message={message} closable type="success" onClose={onClose} />
+                )}
                 <button onClick={handleSaveFile}>Save File</button>
             </div>
             <textarea
                 value={fileContent}
                 onChange={handleEditorChange}
                 className={styles.editor}
-                rows={38}
+                rows={32}
                 cols={80}
             />
         </div>

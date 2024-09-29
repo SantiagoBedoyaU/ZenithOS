@@ -2,7 +2,7 @@
 import { invoke } from "@tauri-apps/api";
 import styles from "./page.module.css";
 import { Input, Button, Form, FormProps, Alert, ConfigProvider, theme } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type FieldType = {
@@ -19,9 +19,10 @@ export default function Login() {
       password: values.password,
     })
       .then((result) => {
-        const [user, role] = result.split(":")
+        const [user, role, folderName] = result.split(":")
         localStorage.setItem('user', user)
         localStorage.setItem('role', role)
+        localStorage.setItem("folderName", folderName)
         router.push("/desktop");
       })
       .catch((error) => setMessage(error));
@@ -36,6 +37,11 @@ export default function Login() {
   const onClose = () => {
     setMessage("");
   };
+
+  useEffect(() => {
+    invoke("sync_users_with_home").then(console.log)
+  }, [])
+
   return (
     <ConfigProvider
       theme={{

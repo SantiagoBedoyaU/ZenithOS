@@ -4,9 +4,9 @@
 use bcrypt::{hash, verify, DEFAULT_COST};
 use serde::Serialize;
 use std::{
-    fs::{self, File},
+    fs::{self, write, File},
     io::{BufRead, BufReader, Write},
-    path::Path,
+    path::{self, Path},
 };
 
 #[derive(Serialize)]
@@ -21,7 +21,9 @@ fn main() {
             login,
             get_users,
             register_user,
-            sync_users_with_home
+            sync_users_with_home,
+            get_folder_files,
+            write_user_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -41,9 +43,10 @@ fn login(username: &str, password: &str) -> Result<String, String> {
             let user = parts[0];
             let pass = parts[1];
             let role = parts[2];
+            let folder_name = parts[3];
             if user == username {
                 if verify(password, pass).expect("failed to verify the password") {
-                    return Ok(format!("{}:{}", user, role));
+                    return Ok(format!("{}:{}:{}", user, role, folder_name));
                 }
             }
         }
@@ -90,11 +93,11 @@ fn register_user(username: &str, password: &str, role: &str) -> Result<String, S
         .expect("failed to open file");
 
     let hashed_password = hash(password, DEFAULT_COST).expect("failed to hash password");
-    writeln!(file, "{}:{}:{}", username, hashed_password, role)
+    let folder_name = username.to_lowercase().replace(|c:char| !c.is_alphanumeric(), "");
+    writeln!(file, "{}:{}:{}:{}", username, hashed_password, role, folder_name)
         .expect("failed to write in the file");
 
-    let user_dir = format!("home/{}", username);
-    fs::create_dir_all(user_dir).expect("failed to create user directory");
+    sync_users_with_home().expect("failed to sync users with home");
     Ok("User registered successfully".to_string())
 }
 
@@ -108,14 +111,53 @@ fn sync_users_with_home() -> Result<String, String> {
         let line = line.expect("Failed to read line");
         let parts = line.split(':').collect::<Vec<&str>>();
 
-        let username = parts[0];
-        let user_dir = format!("home/{}", username);
+        let folder_name = parts[parts.len() - 1];
+        let user_dir = format!("home/{}", folder_name);
 
         match fs::create_dir_all(user_dir) {
-            Ok(_) => println!("Folder created for user {}", username),
-            Err(err) => eprintln!("Failed to create folder for user {}: {}", username, err),
+            Ok(_) => println!("Folder created {}", folder_name),
+            Err(err) => eprintln!("Failed to create folder {}: {}", folder_name, err),
         }
     }
 
     Ok("Users synchronized with home folders".to_string())
+}
+
+#[tauri::command]
+fn get_folder_files(folder_name: &str) -> Result<Vec<(String, u64, String)>, String> {
+    let path = format!("home/{}", folder_name);
+    let dir = match fs::read_dir(path) {
+        Ok(dir) => dir,
+        Err(_) => return Err("Failed to read directory".to_string()),
+    };
+
+    let mut files = Vec::new();
+    for entry in dir {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(_) => continue,
+        };
+        let file_name = entry.file_name().to_str().unwrap().to_string();
+        let file_type = if entry.file_type().unwrap().is_dir() {
+            "folder".to_string()
+        } else {
+            "file".to_string()
+        };
+        let file_size = entry.metadata().unwrap().len();
+
+        files.push((file_name, file_size, file_type));
+    }
+
+    Ok(files)
+}
+
+#[tauri::command]
+fn write_user_file(folder_name: &str, filename: &str, content: &str) -> Result<String, String> {
+    let path = format!("home/{}/{}", folder_name, filename);
+
+    if let Err(err) = write(path, content) {
+        return Err(err.to_string())
+    }
+
+    Ok("File written successfully!".to_string())
 }

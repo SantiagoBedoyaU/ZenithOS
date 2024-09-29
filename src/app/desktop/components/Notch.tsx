@@ -5,7 +5,11 @@ import { Dropdown, Space } from "antd";
 import { exit } from '@tauri-apps/api/process'
 import { useRouter } from "next/navigation";
 
-export const Notch = () => {
+type Props = {
+  apps: { key: string, label: string }[]
+}
+
+export const Notch = ({ apps }: Props) => {
   const [date, setDate] = useState(new Date());
   const router = useRouter()
 
@@ -13,6 +17,7 @@ export const Notch = () => {
     exit()
   }
   const onLogout = () => {
+    localStorage.clear()
     router.back()
   }
 
@@ -36,6 +41,13 @@ export const Notch = () => {
 
   return (
     <div className={styles.notch}>
+      <Dropdown menu={{ items: apps }} trigger={['click']} >
+        <a onClick={(e) => e.preventDefault()}>
+          <Space>
+            <img className={styles.apps} src="/images/apps_logo.jpg" alt="poweroff" />
+          </Space>
+        </a>
+      </Dropdown>
       <span>{date.toLocaleDateString()}</span>
       <span style={{ marginLeft: 8 }}>{date.toLocaleTimeString()}</span>
       <Dropdown menu={{ items }} trigger={['click']} >

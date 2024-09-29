@@ -1,13 +1,13 @@
+import { invoke } from '@tauri-apps/api';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 interface UserFile {
-    id: number;
-    name: string;
-    type: 'file' | 'folder';
-    size: number;
-    path: string;
-    thumbnail: string; // Add a thumbnail property for files
+  id: number;
+  name: string;
+  type: 'file' | 'folder';
+  size: number;
+  thumbnail: string; // Add a thumbnail property for files
 }
 
 const FileManagerContainer = styled.div`
@@ -75,72 +75,58 @@ const FileInfoDetail = styled.p`
 `;
 
 const FileManager: React.FC = () => {
-    const [files, setFiles] = useState<UserFile[]>([]);
-    const [currentPath, setCurrentPath] = useState('/');
-    const [selectedFile, setSelectedFile] = useState<UserFile | null>(null);
+  const [files, setFiles] = useState<UserFile[]>([]);
+  const [selectedFile, setSelectedFile] = useState<UserFile | null>(null);
 
-    useEffect(() => {
-        // Load files for the current path
-        const loadFiles = async () => {
-            // Replace with your own file system API or mock data
-            const files: UserFile[] = [
-                {
-                    id: 1,
-                    name: 'File 1.txt',
-                    type: 'file',
-                    size: 1024,
-                    path: '/',
-                    thumbnail: 'https://via.placeholder.com/100x100',
-                },
-                {
-                    id: 2,
-                    name: 'Folder 1',
-                    type: 'folder',
-                    size: 0,
-                    path: '/',
-                    thumbnail: 'https://via.placeholder.com/100x100',
-                },
-                {
-                    id: 3,
-                    name: 'File 2.txt',
-                    type: 'file',
-                    size: 2048,
-                    path: '/',
-                    thumbnail: 'https://via.placeholder.com/100x100',
-                },
-            ];
-            setFiles(files);
-        };
-        loadFiles();
-    }, [currentPath]);
+  useEffect(() => {
+    invoke<any>('get_folder_files', {
+      folderName: localStorage.getItem('folderName')!
+    }).then(result => {
+      const files: UserFile[] = [];
+      for (let i = 0; i < result.length; i++) {
+        const [fileName, size, type] = result[i];
+        files.push({
+          id: i + 1,
+          name: fileName,
+          type: type,
+          size: size,
+          thumbnail: type == 'file' ? '/images/file_logo.png' : '/images/folder_logo.png'
+        })
+      }
+      setFiles(files)
+    })
+  }, []);
 
-    const handleFileClick = (file: UserFile) => {
-        setSelectedFile(file);
-    };
+  const handleFileClick = (file: UserFile) => {
+    setSelectedFile(file);
+  };
 
-    return (
-        <FileManagerContainer>
-            <FileListContainer>
-                {files.map((file) => (
-                    <FileItem key={file.id} onClick={() => handleFileClick(file)}>
-                        <FileThumbnail src={file.thumbnail} />
-                        <FileName>{file.name}</FileName>
-                        <FileSize>{file.size} bytes</FileSize>
-                    </FileItem>
-                ))}
-            </FileListContainer>
-            <FileInfoContainer>
-                {selectedFile && (
-                    <div>
-                        <FileInfoTitle>{selectedFile.name}</FileInfoTitle>
-                        <FileInfoDetail>Type: {selectedFile.type}</FileInfoDetail>
-                        <FileInfoDetail>Size: {selectedFile.size} bytes</FileInfoDetail>
-                        <FileInfoDetail>Path: {selectedFile.path}</FileInfoDetail>
-                    </div>
-                )}
-            </FileInfoContainer>
-        </FileManagerContainer>
-    );
+  return (
+    <FileManagerContainer>
+      <FileListContainer>
+        {files.length === 0 ? (
+          <p>No files available.</p>
+        ) : (
+          files.map((file) => (
+            <FileItem key={file.id} onClick={() => handleFileClick(file)}>
+              <FileThumbnail src={file.thumbnail} />
+              <FileName>{file.name}</FileName>
+              <FileSize>{file.size} bytes</FileSize>
+            </FileItem>
+          ))
+        )}
+      </FileListContainer>
+      <FileInfoContainer>
+        {selectedFile && (
+          <div>
+            <FileInfoTitle>{selectedFile.name}</FileInfoTitle>
+            <FileInfoDetail>Type: {selectedFile.type}</FileInfoDetail>
+            <FileInfoDetail>Size: {selectedFile.size} bytes</FileInfoDetail>
+          </div>
+        )}
+      </FileInfoContainer>
+    </FileManagerContainer>
+  );
 };
 
 export default FileManager;
