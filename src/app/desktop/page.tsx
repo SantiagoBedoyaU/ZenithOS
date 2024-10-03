@@ -119,7 +119,7 @@ export default function Desktop() {
   // }, [])
 
   const getOpenApps = () => {
-    const apps = Object.entries(openApps).filter(value => value[1]).map((value, idx) => ({ key: String(idx + 1), label: value[0] }))
+    const apps = Object.entries(openApps).filter(value => value[1].isOpen).map((value, idx) => ({ key: String(idx + 1), label: value[0] }))
     return apps
   }
 
