@@ -57,6 +57,7 @@ const FileThumbnail = styled.img`
 const FileName = styled.span`
   font-size: 16px;
   font-weight: bold;
+  color: white;
   margin-bottom: 5px;
 `;
 
@@ -66,12 +67,13 @@ const FileSize = styled.span`
 `;
 
 const FileInfoTitle = styled.h2`
+  color: white;
   margin-top: 0;
 `;
 
 const FileInfoDetail = styled.p`
   font-size: 14px;
-  color: #666;
+  color: white;
 `;
 
 const FileManager: React.FC = () => {

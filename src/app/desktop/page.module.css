@@ -231,6 +231,7 @@
     border: none;
     border-radius: 10px;
     resize: none;
+    color: white;
     background-color: #1a1a1a;
     border: 1px solid white;
 }
