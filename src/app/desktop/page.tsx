@@ -17,14 +17,15 @@ import { open } from "@tauri-apps/api/shell";
 
 export default function Desktop() {
   const router = useRouter();
+  const [lastZindex, setLastZindex] = useState(2)
   const [openApps, setOpenApps] = useState({
-    Calculator: false,
-    Users: false,
-    AudioReproducer: false,
-    ImageViewer: false,
-    TextEditor: false,
-    FileManager: false,
-    Browser: false,
+    Calculator: { isOpen: false, zIndex: 1 },
+    Users: { isOpen: false, zIndex: 1 },
+    AudioReproducer: { isOpen: false, zIndex: 1 },
+    ImageViewer: { isOpen: false, zIndex: 1 },
+    TextEditor: { isOpen: false, zIndex: 1 },
+    FileManager: { isOpen: false, zIndex: 1 },
+    Browser: { isOpen: false, zIndex: 1 },
   })
   const [isAdmin, setIsAdmin] = useState(false)
   const [showUsers, setShowUsers] = useState(false);
@@ -35,27 +36,69 @@ export default function Desktop() {
   const [showFileManager, setShowFileManager] = useState(false);
 
   const toggleShowUsers = () => {
-    setOpenApps((openApps) => ({ ...openApps, Users: !showUsers }))
+    setLastZindex(lastZindex + 1)
+    setOpenApps((openApps) => ({
+      ...openApps,
+      Users: {
+        isOpen: !openApps.Users.isOpen,
+        zIndex: lastZindex
+      }
+    }))
     setShowUsers((showUsers) => !showUsers);
   };
   const toggleShowCalculator = () => {
-    setOpenApps((openApps) => ({ ...openApps, Calculator: !showCalculator }))
+    setLastZindex(lastZindex + 1)
+    setOpenApps((openApps) => ({
+      ...openApps,
+      Calculator: {
+        isOpen: !openApps.Calculator.isOpen,
+        zIndex: lastZindex
+      }
+    }))
     setShowCalculator((showCalculator) => !showCalculator);
   };
   const toggleShowAudioReproducer = () => {
-    setOpenApps((openApps) => ({ ...openApps, AudioReproducer: !showAudioReproducer }))
+    setLastZindex(lastZindex + 1)
+    setOpenApps((openApps) => ({
+      ...openApps,
+      AudioReproducer: {
+        isOpen: !openApps.AudioReproducer.isOpen,
+        zIndex: lastZindex
+      }
+    }))
     setShowAudioReproducer((showAudioReproducer) => !showAudioReproducer);
   };
   const toggleShowImageViewer = () => {
-    setOpenApps((openApps) => ({ ...openApps, ImageViewer: !showImageViewer }))
+    setLastZindex(lastZindex + 1)
+    setOpenApps((openApps) => ({
+      ...openApps,
+      ImageViewer: {
+        isOpen: !openApps.ImageViewer.isOpen,
+        zIndex: lastZindex
+      }
+    }))
     setShowImageViewer((showImageViewer) => !showImageViewer);
   };
   const toggleShowTextEditor = () => {
-    setOpenApps((openApps) => ({ ...openApps, textEditor: !showTextEditor }))
+    setLastZindex(lastZindex + 1)
+    setOpenApps((openApps) => ({
+      ...openApps,
+      TextEditor: {
+        isOpen: !openApps.TextEditor.isOpen,
+        zIndex: lastZindex
+      }
+    }))
     setShowTextEditor((showTextEditor) => !showTextEditor);
   };
   const toggleShowFileManager = () => {
-    setOpenApps((openApps) => ({ ...openApps, fileManager: !showFileManager }))
+    setLastZindex(lastZindex + 1)
+    setOpenApps((openApps) => ({
+      ...openApps,
+      FileManager: {
+        isOpen: !openApps.FileManager.isOpen,
+        zIndex: lastZindex
+      }
+    }))
     setShowFileManager((showFileManager) => !showFileManager);
   };
 
@@ -64,12 +107,16 @@ export default function Desktop() {
   };
 
   useEffect(() => {
-    const user = localStorage.getItem("user")
-    if (!user) {
-      router.push("/")
-    }
-    setIsAdmin(localStorage.getItem("role")?.toLowerCase() === 'admin')
-  }, [])
+    console.log(openApps)
+  }, [openApps])
+
+  // useEffect(() => {
+  //   const user = localStorage.getItem("user")
+  //   if (!user) {
+  //     router.push("/")
+  //   }
+  //   setIsAdmin(localStorage.getItem("role")?.toLowerCase() === 'admin')
+  // }, [])
 
   const getOpenApps = () => {
     const apps = Object.entries(openApps).filter(value => value[1]).map((value, idx) => ({ key: String(idx + 1), label: value[0] }))
@@ -82,32 +129,32 @@ export default function Desktop() {
     >
       <div className={styles.desktop}>
         {(showUsers && isAdmin) && (
-          <Window width="90%" height="80%" onClose={() => toggleShowUsers()}>
+          <Window zIndex={openApps.Users.zIndex} width="90%" height="80%" onClose={() => toggleShowUsers()}>
             <UsersForm />
           </Window>
         )}
         {showCalculator && (
-          <Window width="50%" height="55%" onClose={() => toggleShowCalculator()}>
+          <Window zIndex={openApps.Calculator.zIndex} width="50%" height="55%" onClose={() => toggleShowCalculator()}>
             <Calculator />
           </Window>
         )}
         {showAudioReproducer && (
-          <Window width="30%" height="20%" onClose={() => toggleShowAudioReproducer()}>
+          <Window zIndex={openApps.AudioReproducer.zIndex} width="30%" height="20%" onClose={() => toggleShowAudioReproducer()}>
             <AudioReproducer />
           </Window>
         )}
         {showImageViewer && (
-          <Window width="60%" height="70%" onClose={() => toggleShowImageViewer()}>
+          <Window zIndex={openApps.ImageViewer.zIndex} width="60%" height="70%" onClose={() => toggleShowImageViewer()}>
             <ImageViewer />
           </Window>
         )}
         {showTextEditor && (
-          <Window width="90%" height="80%" onClose={() => toggleShowTextEditor()}>
+          <Window zIndex={openApps.TextEditor.zIndex} width="90%" height="80%" onClose={() => toggleShowTextEditor()}>
             <TextEditor />
           </Window>
         )}
         {showFileManager && (
-          <Window width="90%" height="80%" onClose={() => toggleShowFileManager()}>
+          <Window zIndex={openApps.FileManager.zIndex} width="90%" height="80%" onClose={() => toggleShowFileManager()}>
             <FileManager />
           </Window>
         )}
