@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api';
+import { Button, Dropdown, Form, Input, Modal } from 'antd';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
@@ -79,8 +80,10 @@ const FileInfoDetail = styled.p`
 const FileManager: React.FC = () => {
   const [files, setFiles] = useState<UserFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<UserFile | null>(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const [fileName, setFileName] = useState("")
 
-  useEffect(() => {
+  const getFolderFiles = () => {
     invoke<any>('get_folder_files', {
       folderName: localStorage.getItem('folderName')!
     }).then(result => {
@@ -97,33 +100,78 @@ const FileManager: React.FC = () => {
       }
       setFiles(files)
     })
+  }
+
+  useEffect(() => {
+    getFolderFiles()
   }, []);
 
   const handleFileClick = (file: UserFile) => {
     setSelectedFile(file);
   };
 
+  const onDeleteFile = () => {
+    invoke<any>('delete_fodler_file', {
+      filename: selectedFile!.name,
+      folderName: localStorage.getItem('folderName')!
+    }).then(() => {
+      getFolderFiles()
+      setSelectedFile(null)
+    }).catch(err => console.error(err))
+  }
+
+  const handleOkCreateFile = () => {
+    invoke('create_folder_filename', {
+      folderName: localStorage.getItem('folderName')!,
+      filename: fileName
+    }).then(() => {
+      setIsOpen(false);
+      getFolderFiles();
+    }).catch(err => console.error(err))
+  }
+
+  const items = [
+    {
+      label: <div onClick={() => setIsOpen(true)}>New File/Folder</div>,
+      key: 1
+    },
+  ]
+
   return (
     <FileManagerContainer>
-      <FileListContainer>
-        {files.length === 0 ? (
-          <p>No files available.</p>
-        ) : (
-          files.map((file) => (
-            <FileItem key={file.id} onClick={() => handleFileClick(file)}>
-              <FileThumbnail src={file.thumbnail} />
-              <FileName>{file.name}</FileName>
-              <FileSize>{file.size} bytes</FileSize>
-            </FileItem>
-          ))
-        )}
-      </FileListContainer>
+      <Modal open={isOpen} onOk={handleOkCreateFile} onCancel={() => setIsOpen(false)}>
+        <div style={{ margin: 20 }}>
+          <Form>
+            <Form.Item label="Name" rules={[{ required: true }]} extra="If you want to create a folder add / to the beginning of the name">
+              <Input onChange={e => setFileName(e.target.value)} />
+            </Form.Item>
+          </Form>
+        </div>
+      </Modal>
+      <Dropdown menu={{ items }} trigger={['contextMenu']}>
+        <FileListContainer>
+          {files.length === 0 ? (
+            <p>No files available.</p>
+          ) : (
+            files.map((file) => (
+              <FileItem key={file.id} onClick={() => handleFileClick(file)}>
+                <FileThumbnail src={file.thumbnail} />
+                <FileName>{file.name}</FileName>
+                <FileSize>{file.size} bytes</FileSize>
+              </FileItem>
+            ))
+          )}
+        </FileListContainer>
+      </Dropdown>
       <FileInfoContainer>
         {selectedFile && (
           <div>
             <FileInfoTitle>{selectedFile.name}</FileInfoTitle>
             <FileInfoDetail>Type: {selectedFile.type}</FileInfoDetail>
             <FileInfoDetail>Size: {selectedFile.size} bytes</FileInfoDetail>
+            <Button style={{ marginTop: 10 }} color="danger" onClick={onDeleteFile}>
+              Delete
+            </Button>
           </div>
         )}
       </FileInfoContainer>

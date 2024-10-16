@@ -24,7 +24,6 @@ export default function Calculator() {
   }
 
   const handleEqual = () => {
-    console.log(inputValue)
     const result = eval(inputValue)
     setInputValue(result.toString())
     setOperator('')

@@ -24,6 +24,8 @@ fn main() {
             sync_users_with_home,
             get_folder_files,
             write_user_file,
+            create_folder_filename,
+            delete_fodler_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -93,9 +95,15 @@ fn register_user(username: &str, password: &str, role: &str) -> Result<String, S
         .expect("failed to open file");
 
     let hashed_password = hash(password, DEFAULT_COST).expect("failed to hash password");
-    let folder_name = username.to_lowercase().replace(|c:char| !c.is_alphanumeric(), "");
-    writeln!(file, "{}:{}:{}:{}", username, hashed_password, role, folder_name)
-        .expect("failed to write in the file");
+    let folder_name = username
+        .to_lowercase()
+        .replace(|c: char| !c.is_alphanumeric(), "");
+    writeln!(
+        file,
+        "{}:{}:{}:{}",
+        username, hashed_password, role, folder_name
+    )
+    .expect("failed to write in the file");
 
     sync_users_with_home().expect("failed to sync users with home");
     Ok("User registered successfully".to_string())
@@ -156,8 +164,54 @@ fn write_user_file(folder_name: &str, filename: &str, content: &str) -> Result<S
     let path = format!("home/{}/{}", folder_name, filename);
 
     if let Err(err) = write(path, content) {
-        return Err(err.to_string())
+        return Err(err.to_string());
     }
 
     Ok("File written successfully!".to_string())
+}
+
+#[tauri::command]
+fn create_folder_filename(folder_name: &str, filename: &str) -> Result<String, String> {
+    let path = format!("home/{}/", folder_name);
+    let full_path = if filename.starts_with('/') {
+        let folder_name = filename.trim_start_matches('/');
+        format!("{}/{}", path, folder_name)
+    } else {
+        format!("{}/{}", path, filename)
+    };
+
+    if filename.starts_with('/') {
+        if let Err(err) = fs::create_dir_all(full_path) {
+            return Err(err.to_string());
+        }
+        Ok("Folder {} created successfully!".to_string())
+    } else {
+        let file_path = full_path.clone();
+        let parent_dir = file_path.clone();
+        let parent_dir = parent_dir.trim_end_matches(filename).to_string();
+        if let Err(err) = fs::create_dir_all(parent_dir) {
+            return Err(err.to_string());
+        }
+        File::create(file_path)
+            .map_err(|err| err.to_string())
+            .map(|_| "File created successfully!".to_string())
+    }
+}
+
+#[tauri::command]
+fn delete_fodler_file(folder_name: &str, filename: &str) -> Result<String, String> {
+    let path = format!("home/{}/{}", folder_name, filename);
+    if fs::metadata(&path).is_err() {
+        return Err("File not found".to_string());
+    }
+    if fs::metadata(&path).unwrap().is_dir() {
+        if let Err(err) = fs::remove_dir(&path) {
+            return Err(err.to_string());
+        }
+    } else {
+        if let Err(err) = fs::remove_file(&path) {
+            return Err(err.to_string());
+        }
+    }
+    Ok("File deleted successfully!".to_string())
 }

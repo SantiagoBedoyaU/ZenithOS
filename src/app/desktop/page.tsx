@@ -14,6 +14,7 @@ import FileManager from "./components/FileManager";
 import { useRouter } from "next/navigation";
 import { ConfigProvider, theme } from "antd";
 import { open } from "@tauri-apps/api/shell";
+import {randomUUID} from 'crypto'
 
 export default function Desktop() {
   const router = useRouter();
@@ -107,19 +108,24 @@ export default function Desktop() {
   };
 
   useEffect(() => {
-    console.log(openApps)
-  }, [openApps])
-
-  // useEffect(() => {
-  //   const user = localStorage.getItem("user")
-  //   if (!user) {
-  //     router.push("/")
-  //   }
-  //   setIsAdmin(localStorage.getItem("role")?.toLowerCase() === 'admin')
-  // }, [])
+    const user = localStorage.getItem("user")
+    if (!user) {
+      router.push("/")
+    }
+    setIsAdmin(localStorage.getItem("role")?.toLowerCase() === 'admin')
+  }, [])
 
   const getOpenApps = () => {
-    const apps = Object.entries(openApps).filter(value => value[1].isOpen).map((value, idx) => ({ key: String(idx + 1), label: value[0] }))
+    const apps = Object.entries(openApps)
+      .filter(value => value[1].isOpen)
+      .map((value, idx) => {
+        const randomHex = () => Math.floor(Math.random() * 0xFFFFFFF).toString()
+        const id = `0x${randomHex()}`
+        return {
+          key: String(idx + 1), 
+          label: `${id} - ${value[0]}` 
+        }
+      })
     return apps
   }
 
