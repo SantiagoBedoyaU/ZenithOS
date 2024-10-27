@@ -1,2 +1,3 @@
 SantiagoBedoya:$2b$12$.LZiqnU0QfW9h/mNTppfked1r9RaLGxqR9PNzDipYQmEHXGBtKS6a:Admin:santiagobedoya
 Hector:$2b$12$fd04Bv9iFnQNOuqMNUiHDOzw5X9m13JNsmI90stHRO0u7ildMtjLS:User:hector
+raul:$2b$12$WAeBD0.EG2.TWARG5wPFceutfRez9HAT8jITZYUOsDUSwoYGMWyG2:User:raul
