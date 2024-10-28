@@ -1,29 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from '../page.module.css'
 import { invoke } from '@tauri-apps/api';
 import { Alert } from 'antd';
 
-export default function TextEditor() {
+type Props = {
+    filepath?: string
+}
+
+export default function TextEditor({filepath}: Props) {
     const [fileContent, setFileContent] = useState('');
-    const [fileName, setFileName] = useState('');
+    const [fileName, setFileName] = useState("");
     const [fileType, setFileType] = useState('text/plain'); // default file type is text/plain, which corresponds to .txt files
     const [message, setMessage] = useState('')
 
-    const handleOpenFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files![0];
-        const fileReader = new FileReader();
-        fileReader.onload = () => {
-            setFileContent(fileReader.result as string);
-            setFileName(file.name);
-            setFileType(file.type);
-        };
-        fileReader.readAsText(file);
-    };
-
     const handleSaveFile = () => {
+        let filepath = fileName
+        const folderName = localStorage.getItem("folderName");
+        if (!fileName.includes(folderName!)) {
+            filepath = `/${folderName!}/${filepath}`
+        }
         invoke<string>('write_user_file', {
-            folderName: localStorage.getItem("folderName"),
-            filename: fileName,
+            foldername: localStorage.getItem("folderName"),
+            filepath: filepath,
             content: fileContent
         }).then(result => {
             setMessage(result)
@@ -44,10 +42,24 @@ export default function TextEditor() {
         setMessage("");
     };
 
+    const getFileContent = async (path: string) => {
+        const filepath = path.split("public").pop()
+        const response = await fetch('http://localhost:3000/' + filepath)
+        const content = await response.text()
+        setFileContent(content)
+        setFileName(filepath?.split("home").pop()!)
+    }
+
+    useEffect(() =>{
+        if (filepath) {
+            getFileContent(filepath);
+        }
+        const folderName = localStorage.getItem("folderName")
+    }, [])
+
     return (
         <div className={styles.textEditor}>
             <div className={styles.toolbar}>
-                <input type="file" onChange={handleOpenFile} />
                 <input
                     type="text"
                     value={fileName}

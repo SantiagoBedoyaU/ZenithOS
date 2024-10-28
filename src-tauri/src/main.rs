@@ -143,7 +143,7 @@ fn sync_users_with_home() -> Result<String, String> {
         let user_dir = format!("{}/{}", get_data_folder()?, folder_name);
 
         match fs::create_dir_all(&user_dir) {
-            Ok(_) => println!("Folder created {}", folder_name),
+            Ok(_) => {},
             Err(err) => eprintln!("Failed to create folder {}: {}", folder_name, err),
         }
 
@@ -158,7 +158,7 @@ fn sync_users_with_home() -> Result<String, String> {
         for subfolder in subfolders.iter() {
             let subfolder_path = format!("{}/{}", user_dir, subfolder);
             match fs::create_dir_all(&subfolder_path) {
-                Ok(_) => println!("Subfolder created {}", subfolder_path),
+                Ok(_) => {},
                 Err(err) => eprintln!("Failed to create subfolder {}: {}", subfolder, err),
             }
         }
@@ -217,10 +217,13 @@ fn get_folder_files(folder_name: &str) -> Result<Vec<FileNode>, String> {
 }
 
 #[tauri::command]
-fn write_user_file(folder_name: &str, filename: &str, content: &str) -> Result<String, String> {
-    let user_path = format!("{}/{}/{}", get_data_folder()?, folder_name, filename);
+fn write_user_file(foldername: &str, filepath: &str, content: &str) -> Result<String, String> {
+    if !filepath.contains(foldername) {
+        return Err("Invalid file path".to_string());
+    }
 
-    if let Err(err) = write(user_path, content) {
+    let path = format!("{}{}", get_data_folder()?, filepath);
+    if let Err(err) = write(path, content) {
         return Err(err.to_string());
     }
 

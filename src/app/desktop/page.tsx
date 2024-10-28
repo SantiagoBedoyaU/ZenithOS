@@ -12,9 +12,9 @@ import ImageViewer from "./components/ImageViewer";
 import TextEditor from "./components/TextEditor";
 import FileManager from "./components/FileManager";
 import { useRouter } from "next/navigation";
-import { ConfigProvider, theme } from "antd";
+import { ConfigProvider, theme, Tooltip } from "antd";
 import { open } from "@tauri-apps/api/shell";
-import {randomUUID} from 'crypto'
+
 
 export default function Desktop() {
   const router = useRouter();
@@ -29,79 +29,46 @@ export default function Desktop() {
     Browser: { isOpen: false, zIndex: 1 },
   })
   const [isAdmin, setIsAdmin] = useState(false)
-  const [showUsers, setShowUsers] = useState(false);
-  const [showCalculator, setShowCalculator] = useState(false);
-  const [showAudioReproducer, setShowAudioReproducer] = useState(false);
-  const [showImageViewer, setShowImageViewer] = useState(false);
-  const [showTextEditor, setShowTextEditor] = useState(false);
-  const [showFileManager, setShowFileManager] = useState(false);
+  const [openedApps, setOpenedApps] = useState<{ [key: string]: { element: React.JSX.Element, name: string } }>({})
 
-  const toggleShowUsers = () => {
+  const getUniqueID = (): string => {
+    const time = Date.now().toString()
+    const randn = Math.random().toString().substring(2, 8);
+    return time + randn
+  }
+
+  const closeAppInstance = (instanceID: string) => {
+    setOpenedApps(prevOpenedApps => {
+      const newOpenedApps = { ...prevOpenedApps }
+      delete newOpenedApps[instanceID]
+      return newOpenedApps
+    })
+  }
+
+  const openInstanceApp = (element: JSX.Element, name: string, width: string, height: string) => {
     setLastZindex(lastZindex + 1)
-    setOpenApps((openApps) => ({
-      ...openApps,
-      Users: {
-        isOpen: !openApps.Users.isOpen,
-        zIndex: lastZindex
-      }
-    }))
-    setShowUsers((showUsers) => !showUsers);
-  };
-  const toggleShowCalculator = () => {
-    setLastZindex(lastZindex + 1)
-    setOpenApps((openApps) => ({
-      ...openApps,
-      Calculator: {
-        isOpen: !openApps.Calculator.isOpen,
-        zIndex: lastZindex
-      }
-    }))
-    setShowCalculator((showCalculator) => !showCalculator);
-  };
-  const toggleShowAudioReproducer = () => {
-    setLastZindex(lastZindex + 1)
-    setOpenApps((openApps) => ({
-      ...openApps,
-      AudioReproducer: {
-        isOpen: !openApps.AudioReproducer.isOpen,
-        zIndex: lastZindex
-      }
-    }))
-    setShowAudioReproducer((showAudioReproducer) => !showAudioReproducer);
-  };
-  const toggleShowImageViewer = () => {
-    setLastZindex(lastZindex + 1)
-    setOpenApps((openApps) => ({
-      ...openApps,
-      ImageViewer: {
-        isOpen: !openApps.ImageViewer.isOpen,
-        zIndex: lastZindex
-      }
-    }))
-    setShowImageViewer((showImageViewer) => !showImageViewer);
-  };
-  const toggleShowTextEditor = () => {
-    setLastZindex(lastZindex + 1)
-    setOpenApps((openApps) => ({
-      ...openApps,
-      TextEditor: {
-        isOpen: !openApps.TextEditor.isOpen,
-        zIndex: lastZindex
-      }
-    }))
-    setShowTextEditor((showTextEditor) => !showTextEditor);
-  };
-  const toggleShowFileManager = () => {
-    setLastZindex(lastZindex + 1)
-    setOpenApps((openApps) => ({
-      ...openApps,
-      FileManager: {
-        isOpen: !openApps.FileManager.isOpen,
-        zIndex: lastZindex
-      }
-    }))
-    setShowFileManager((showFileManager) => !showFileManager);
-  };
+    const instanceID = getUniqueID();
+    const w = (
+      <Window zIndex={openApps.FileManager.zIndex} width={width} height={height} onClose={() => closeAppInstance(instanceID)}>
+        {element}
+      </Window>
+    )
+    setOpenedApps(prevOpenedApps => {
+      const newOpenedApps = { ...prevOpenedApps }
+      newOpenedApps[instanceID] = { element: w, name: name }
+      return newOpenedApps
+    })
+  }
+
+  const openAppByExtension = (ext: string, filepath: string) => {
+    switch (ext) {
+      case 'txt':
+        openInstanceApp(<TextEditor filepath={filepath} />, "Text Editor", "90%", "80%")
+        return
+      default:
+        console.log("unsupported file extension")
+    }
+  }
 
   const openBrowser = async () => {
     await open("https://www.google.com/")
@@ -116,17 +83,21 @@ export default function Desktop() {
   }, [])
 
   const getOpenApps = () => {
-    const apps = Object.entries(openApps)
-      .filter(value => value[1].isOpen)
-      .map((value, idx) => {
-        const randomHex = () => Math.floor(Math.random() * 0xFFFFFFF).toString()
-        const id = `0x${randomHex()}`
-        return {
-          key: String(idx + 1), 
-          label: `${id} - ${value[0]}` 
-        }
-      })
-    return apps
+    return Object.entries(openedApps).map(([key, value]) => {
+      return {
+        key: key,
+        label: (
+          <Tooltip title={
+            `Addres: ${key}
+            Click to close process
+            `
+          }
+          >
+            <span onClick={() => closeAppInstance(key)}>{value.name}</span>
+          </Tooltip>
+        )
+      }
+    })
   }
 
   return (
@@ -134,47 +105,41 @@ export default function Desktop() {
       theme={{ algorithm: theme.darkAlgorithm }}
     >
       <div className={styles.desktop}>
-        {(showUsers && isAdmin) && (
-          <Window zIndex={openApps.Users.zIndex} width="90%" height="80%" onClose={() => toggleShowUsers()}>
-            <UsersForm />
-          </Window>
-        )}
-        {showCalculator && (
-          <Window zIndex={openApps.Calculator.zIndex} width="50%" height="55%" onClose={() => toggleShowCalculator()}>
-            <Calculator />
-          </Window>
-        )}
-        {showAudioReproducer && (
-          <Window zIndex={openApps.AudioReproducer.zIndex} width="30%" height="20%" onClose={() => toggleShowAudioReproducer()}>
-            <AudioReproducer />
-          </Window>
-        )}
-        {showImageViewer && (
-          <Window zIndex={openApps.ImageViewer.zIndex} width="60%" height="70%" onClose={() => toggleShowImageViewer()}>
-            <ImageViewer />
-          </Window>
-        )}
-        {showTextEditor && (
-          <Window zIndex={openApps.TextEditor.zIndex} width="90%" height="80%" onClose={() => toggleShowTextEditor()}>
-            <TextEditor />
-          </Window>
-        )}
-        {showFileManager && (
-          <Window zIndex={openApps.FileManager.zIndex} width="90%" height="80%" onClose={() => toggleShowFileManager()}>
-            <FileManager />
-          </Window>
-        )}
+        {Object.values(openedApps).map(app => (
+          app.element
+        ))}
         <Notch apps={getOpenApps()} />
         <Dock>
-          <Icon image="/images/file_manager_logo.png" onClick={toggleShowFileManager} />
+          <Icon
+            image="/images/file_manager_logo.png"
+            onClick={() => openInstanceApp(<FileManager onDoubleClick={openAppByExtension} />, "File Manager", "90%", "80%")}
+          />
           {isAdmin && (
-            <Icon image="/images/users_logo.png" onClick={toggleShowUsers} />
+            <Icon
+              image="/images/users_logo.png"
+              onClick={() => openInstanceApp(<UsersForm />, "Users Manager", "90%", "80%")}
+            />
           )}
-          <Icon image="/images/calculator_logo.webp" onClick={toggleShowCalculator} />
-          <Icon image="/images/audio_reproducer_logo.png" onClick={toggleShowAudioReproducer} />
-          <Icon image="/images/images_logo.png" onClick={toggleShowImageViewer} />
-          <Icon image="/images/text_editor_logo.png" onClick={toggleShowTextEditor} />
-          <Icon image="/images/browser_logo.png" onClick={openBrowser} />
+          <Icon
+            image="/images/calculator_logo.webp"
+            onClick={() => openInstanceApp(<Calculator />, "Calculator", "50%", "55%")}
+          />
+          <Icon
+            image="/images/audio_reproducer_logo.png"
+            onClick={() => openInstanceApp(<AudioReproducer />, "Audio Reproducer", "30%", "20%")}
+          />
+          <Icon
+            image="/images/images_logo.png"
+            onClick={() => openInstanceApp(<ImageViewer />, "Image Viewer", "60%", "70%")}
+          />
+          <Icon
+            image="/images/text_editor_logo.png"
+            onClick={() => openInstanceApp(<TextEditor />, "Text Editor", "90%", "80%")}
+          />
+          <Icon
+            image="/images/browser_logo.png"
+            onClick={openBrowser}
+          />
         </Dock>
       </div>
     </ConfigProvider>

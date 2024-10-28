@@ -3,7 +3,11 @@ import { Tree, TreeDataNode, Form, Input, Button } from "antd";
 import { DirectoryTreeProps } from "antd/es/tree";
 import React, { useState, useEffect } from "react";
 
-const FileManager: React.FC = () => {
+type Props = {
+  onDoubleClick: (ext: string, filepath: string) => void
+}
+
+const FileManager = ({onDoubleClick: openAppByExtension}: Props) => {
   const [files, setFiles] = useState<TreeDataNode[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [selectedFilePath, setSelectedFilePath] = useState<string>("");
@@ -58,6 +62,12 @@ const FileManager: React.FC = () => {
     setSelectedFile(value);
   };
 
+  const onDoubleClick: DirectoryTreeProps["onDoubleClick"] = (params, info) => {
+    const filename = (info.key as string).split("/").pop()
+    const ext = filename?.split(".").pop()!
+    openAppByExtension(ext, info.key as string)
+  }
+
   return (
     <div>
       <div>
@@ -96,6 +106,7 @@ const FileManager: React.FC = () => {
         defaultExpandAll
         treeData={files}
         onSelect={onSelect}
+        onDoubleClick={onDoubleClick}
       />
     </div>
   );

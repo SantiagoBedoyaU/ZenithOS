@@ -6,7 +6,7 @@ import { exit } from '@tauri-apps/api/process'
 import { useRouter } from "next/navigation";
 
 type Props = {
-  apps: { key: string, label: string }[]
+  apps: { key: string, label: React.ReactNode }[]
 }
 
 export const Notch = ({ apps }: Props) => {
