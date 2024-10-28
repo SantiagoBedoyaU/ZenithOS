@@ -1,27 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from '../page.module.css'
 
-export default function AudioReproducer() {
-    const [uploadedAudio, setUploadedAudio] = useState<File | null>(null);
+type Props = {
+    audioURL?: string
+}
 
-    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setUploadedAudio(file);
+export default function AudioReproducer({audioURL}: Props) {
+    const [audioName, setAudioName] = useState('')
+    const [audio, setAudio] = useState('')
+
+    useEffect(() => {
+        if (audioURL) {
+            const path = audioURL.split("public").pop()
+            setAudio(`http://localhost:3000${path}`)
+            setAudioName(path?.split("/").pop()!)
         }
-    };
+    }, [audioURL])
 
     return (
         <div className={styles.audioPlayer}>
-            <input
-                type="file"
-                accept=".mp3"
-                onChange={handleUpload}
-                className={styles.fileInput}
-            />
-            <audio
+            <label htmlFor="">{audioName}</label>
+           <audio
                 className={styles.audioTag}
-                src={uploadedAudio ? URL.createObjectURL(uploadedAudio) : 'path/to/default/audio/file.mp3'}
+                src={audio}
                 controls
             />
         </div>

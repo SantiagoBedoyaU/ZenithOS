@@ -8,7 +8,7 @@ import Window from "./components/Window";
 import UsersForm from "./components/UsersForm";
 import Calculator from "./components/Calculator";
 import AudioReproducer from "./components/AudioReproducer";
-import ImageViewer from "./components/ImageViewer";
+import MediaViewer from "./components/MediaViewer";
 import TextEditor from "./components/TextEditor";
 import FileManager from "./components/FileManager";
 import { useRouter } from "next/navigation";
@@ -64,6 +64,15 @@ export default function Desktop() {
     switch (ext) {
       case 'txt':
         openInstanceApp(<TextEditor filepath={filepath} />, "Text Editor", "90%", "80%")
+        return
+      case 'mp3':
+        openInstanceApp(<AudioReproducer audioURL={filepath} />, "Audio Reproducer", "30%", "20%")
+        return
+      case 'mp4':
+      case 'jpg':
+      case 'png':
+      case 'jpeg':
+        openInstanceApp(<MediaViewer sourceURL={filepath} />, "Media Viewer", "60%", "70%")
         return
       default:
         console.log("unsupported file extension")
@@ -130,7 +139,7 @@ export default function Desktop() {
           />
           <Icon
             image="/images/images_logo.png"
-            onClick={() => openInstanceApp(<ImageViewer />, "Image Viewer", "60%", "70%")}
+            onClick={() => openInstanceApp(<MediaViewer />, "Media Viewer", "60%", "70%")}
           />
           <Icon
             image="/images/text_editor_logo.png"
