@@ -14,6 +14,8 @@ import FileManager from "./components/FileManager";
 import { useRouter } from "next/navigation";
 import { ConfigProvider, theme, Tooltip } from "antd";
 import { open } from "@tauri-apps/api/shell";
+import Hangman from "./components/Hangman";
+import Game2048 from "./components/2048";
 
 
 export default function Desktop() {
@@ -144,6 +146,14 @@ export default function Desktop() {
           <Icon
             image="/images/text_editor_logo.png"
             onClick={() => openInstanceApp(<TextEditor />, "Text Editor", "90%", "80%")}
+          />
+          <Icon
+            image="/images/hangman_logo.jpg"
+            onClick={() => openInstanceApp(<Hangman />, "Hangman", "90%", "80%")}
+          />
+          <Icon
+            image="/images/2048_logo.png"
+            onClick={() => openInstanceApp(<Game2048 />, "2048", "90%", "80%")}
           />
           <Icon
             image="/images/browser_logo.png"
