@@ -66,9 +66,13 @@ export default function Calculator() {
   
   const handlePi = () => {
     if (inputValue === '0') {
-      setInputValue(Math.PI.toString())
+      setInputValue("1")
     } else {
-      setInputValue(inputValue + Math.PI.toString())
+      let result = 1
+      for (let i = 2; i <= parseInt(inputValue); i++) {
+        result = result * i;
+      }
+      setInputValue(result.toString())
     }
   }
 
@@ -144,7 +148,7 @@ export default function Calculator() {
           <button className={styles.button} onClick={() => handleLog()}>log</button>
           <button className={styles.button} onClick={() => handleLn()}>ln</button>
           <button className={styles.button} onClick={() => handleE()}>e</button>
-          <button className={styles.button} onClick={() => handlePi()}>π</button>
+          <button className={styles.button} onClick={() => handlePi()}>n!</button>
         </div>
       </div>
     </div>
